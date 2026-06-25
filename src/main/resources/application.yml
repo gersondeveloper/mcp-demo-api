@@ -1,0 +1,20 @@
+quarkus:
+  datasource:
+    db-kind: postgresql
+    username: user-test
+    password: "user_123#"
+    jdbc:
+      url: jdbc:postgresql://localhost:5432/mcp-demo-api
+
+  hibernate-orm:
+    database:
+      generation: update
+
+  swagger-ui:
+    always-include: true
+
+"%dev":
+  quarkus:
+    hibernate-orm:
+      log:
+        sql: true
