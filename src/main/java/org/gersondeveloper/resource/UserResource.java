@@ -56,6 +56,30 @@ public class UserResource {
         return Response.ok(toResponse(user)).build();
     }
 
+    @PATCH
+    @Path("/{id}/activate")
+    @Transactional
+    public Response activate(@PathParam("id") Long id) {
+        User user = User.findById(id);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        user.isActive = true;
+        return Response.ok(toResponse(user)).build();
+    }
+
+    @PATCH
+    @Path("/{id}/deactivate")
+    @Transactional
+    public Response deactivate(@PathParam("id") Long id) {
+        User user = User.findById(id);
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        user.isActive = false;
+        return Response.ok(toResponse(user)).build();
+    }
+
     private UserResponse toResponse(User user) {
         return new UserResponse(user.id, user.username, user.address, user.isActive, user.createDate);
     }

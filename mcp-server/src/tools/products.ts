@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
-import { apiGet, apiPost } from '../client.js';
+import { apiGet, apiPatch, apiPost } from '../client.js';
 
 const productShape = {
   name: z.string().describe('Nome do produto'),
@@ -34,6 +34,34 @@ export function registerProductTools(server: McpServer): void {
         return { content: [{ type: 'text' as const, text: `Produto criado com sucesso:\n${JSON.stringify(product, null, 2)}` }] };
       } catch (e) {
         return { content: [{ type: 'text' as const, text: `Erro ao criar produto: ${(e as Error).message}` }] };
+      }
+    }
+  );
+
+  server.tool(
+    'activate_product',
+    'Ativa um produto desativado pelo ID',
+    { id: z.number().int().positive().describe('ID do produto') },
+    async ({ id }) => {
+      try {
+        const product = await apiPatch(`/api/products/${id}/activate`);
+        return { content: [{ type: 'text' as const, text: `Produto ativado com sucesso:\n${JSON.stringify(product, null, 2)}` }] };
+      } catch (e) {
+        return { content: [{ type: 'text' as const, text: `Erro ao ativar produto: ${(e as Error).message}` }] };
+      }
+    }
+  );
+
+  server.tool(
+    'deactivate_product',
+    'Desativa um produto ativo pelo ID',
+    { id: z.number().int().positive().describe('ID do produto') },
+    async ({ id }) => {
+      try {
+        const product = await apiPatch(`/api/products/${id}/deactivate`);
+        return { content: [{ type: 'text' as const, text: `Produto desativado com sucesso:\n${JSON.stringify(product, null, 2)}` }] };
+      } catch (e) {
+        return { content: [{ type: 'text' as const, text: `Erro ao desativar produto: ${(e as Error).message}` }] };
       }
     }
   );

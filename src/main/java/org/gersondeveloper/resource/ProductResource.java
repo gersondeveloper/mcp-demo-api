@@ -60,6 +60,30 @@ public class ProductResource {
         return Response.ok(toResponse(product)).build();
     }
 
+    @PATCH
+    @Path("/{id}/activate")
+    @Transactional
+    public Response activate(@PathParam("id") Long id) {
+        Product product = Product.findById(id);
+        if (product == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        product.isActive = true;
+        return Response.ok(toResponse(product)).build();
+    }
+
+    @PATCH
+    @Path("/{id}/deactivate")
+    @Transactional
+    public Response deactivate(@PathParam("id") Long id) {
+        Product product = Product.findById(id);
+        if (product == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        product.isActive = false;
+        return Response.ok(toResponse(product)).build();
+    }
+
     private ProductResponse toResponse(Product product) {
         return new ProductResponse(
                 product.id, product.name, product.description,

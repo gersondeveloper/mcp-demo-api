@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { apiGet, apiPost } from '../client.js';
+import { apiGet, apiPatch, apiPost } from '../client.js';
 const productShape = {
     name: z.string().describe('Nome do produto'),
     description: z.string().describe('Descrição do produto'),
@@ -23,6 +23,24 @@ export function registerProductTools(server) {
         }
         catch (e) {
             return { content: [{ type: 'text', text: `Erro ao criar produto: ${e.message}` }] };
+        }
+    });
+    server.tool('activate_product', 'Ativa um produto desativado pelo ID', { id: z.number().int().positive().describe('ID do produto') }, async ({ id }) => {
+        try {
+            const product = await apiPatch(`/api/products/${id}/activate`);
+            return { content: [{ type: 'text', text: `Produto ativado com sucesso:\n${JSON.stringify(product, null, 2)}` }] };
+        }
+        catch (e) {
+            return { content: [{ type: 'text', text: `Erro ao ativar produto: ${e.message}` }] };
+        }
+    });
+    server.tool('deactivate_product', 'Desativa um produto ativo pelo ID', { id: z.number().int().positive().describe('ID do produto') }, async ({ id }) => {
+        try {
+            const product = await apiPatch(`/api/products/${id}/deactivate`);
+            return { content: [{ type: 'text', text: `Produto desativado com sucesso:\n${JSON.stringify(product, null, 2)}` }] };
+        }
+        catch (e) {
+            return { content: [{ type: 'text', text: `Erro ao desativar produto: ${e.message}` }] };
         }
     });
     server.tool('create_products_batch', 'Cria múltiplos produtos de uma só vez em paralelo. Use quando o usuário pedir para cadastrar mais de um produto ao mesmo tempo.', { products: z.array(z.object(productShape)).min(1).describe('Lista de produtos a criar') }, async ({ products }) => {
