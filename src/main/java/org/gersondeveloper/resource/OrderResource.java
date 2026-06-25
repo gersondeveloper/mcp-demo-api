@@ -22,6 +22,7 @@ import java.util.List;
 public class OrderResource {
 
     @GET
+    @Transactional
     public List<OrderResponse> listActive() {
         return Order.<Order>list("isActive", true)
                 .stream()
@@ -31,6 +32,7 @@ public class OrderResource {
 
     @GET
     @Path("/{id}")
+    @Transactional
     public Response findById(@PathParam("id") Long id) {
         Order order = Order.findById(id);
         if (order == null || !order.isActive) {
@@ -51,7 +53,8 @@ public class OrderResource {
         order.user = user;
 
         BigDecimal total = BigDecimal.ZERO;
-        for (OrderItemRequest itemReq : request.items()) {
+        List<OrderItemRequest> items = request.items() != null ? request.items() : List.of();
+        for (OrderItemRequest itemReq : items) {
             Product product = Product.findById(itemReq.productId());
             if (product == null || !product.isActive) {
                 return Response.status(Response.Status.BAD_REQUEST).build();

@@ -19,6 +19,7 @@ import java.util.List;
 public class OrderItemResource {
 
     @GET
+    @Transactional
     public List<OrderItemResponse> listActive() {
         return OrderItem.<OrderItem>list("isActive", true)
                 .stream()
@@ -28,6 +29,7 @@ public class OrderItemResource {
 
     @GET
     @Path("/{id}")
+    @Transactional
     public Response findById(@PathParam("id") Long id) {
         OrderItem item = OrderItem.findById(id);
         if (item == null || !item.isActive) {
