@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: mcp-demo-api-db
+    environment:
+      POSTGRES_DB: mcp-demo-api
+      POSTGRES_USER: user-test
+      POSTGRES_PASSWORD: user_123#
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
