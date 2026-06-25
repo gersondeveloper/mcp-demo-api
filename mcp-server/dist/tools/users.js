@@ -32,6 +32,30 @@ export function registerUserTools(server) {
             return { content: [{ type: 'text', text: `Erro ao criar usuário: ${e.message}` }] };
         }
     });
+    server.tool('create_users_batch', 'Cria múltiplos usuários numa única transação. Use quando precisar criar vários usuários de uma vez (ex.: 50) ao invés de chamar create_user repetidamente. Se qualquer um falhar, todo o batch é revertido.', {
+        users: z
+            .array(z.object(userShape))
+            .min(1)
+            .describe('Lista de usuários a criar'),
+    }, async ({ users }) => {
+        const startedAt = Date.now();
+        try {
+            const created = await apiPost('/api/users/batch', users);
+            const elapsedMs = Date.now() - startedAt;
+            const summary = { total: users.length, criados: created.length, tempoMs: elapsedMs };
+            return {
+                content: [
+                    {
+                        type: 'text',
+                        text: `Batch concluído:\n${JSON.stringify(summary, null, 2)}\n\nUsuários criados:\n${JSON.stringify(created, null, 2)}`,
+                    },
+                ],
+            };
+        }
+        catch (e) {
+            return { content: [{ type: 'text', text: `Erro ao criar batch de usuários: ${e.message}` }] };
+        }
+    });
     server.tool('update_user', 'Atualiza os dados de um usuário existente', { id: z.number().int().positive().describe('ID do usuário'), ...userShape }, async ({ id, ...body }) => {
         try {
             const user = await apiPut(`/api/users/${id}`, body);

@@ -43,6 +43,24 @@ public class UserResource {
         return Response.status(Response.Status.CREATED).entity(toResponse(user)).build();
     }
 
+    @POST
+    @Path("/batch")
+    @Transactional
+    public Response createBatch(List<UserRequest> requests) {
+        if (requests == null || requests.isEmpty()) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
+        List<User> users = requests.stream().map(req -> {
+            User user = new User();
+            user.username = req.username();
+            user.address = req.address();
+            return user;
+        }).toList();
+        User.persist(users);
+        List<UserResponse> body = users.stream().map(this::toResponse).toList();
+        return Response.status(Response.Status.CREATED).entity(body).build();
+    }
+
     @PUT
     @Path("/{id}")
     @Transactional

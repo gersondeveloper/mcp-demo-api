@@ -97,4 +97,57 @@ class UserResourceTest {
             .then()
             .statusCode(404);
     }
+
+    @Test
+    void createBatch_returnsAllCreated() {
+        String suffix = String.valueOf(System.nanoTime());
+        given()
+            .contentType(ContentType.JSON)
+            .body("""
+                [
+                  {"username": "batch_a_%1$s", "address": "Addr A"},
+                  {"username": "batch_b_%1$s", "address": "Addr B"},
+                  {"username": "batch_c_%1$s", "address": "Addr C"}
+                ]
+                """.formatted(suffix))
+            .when().post("/api/users/batch")
+            .then()
+            .statusCode(201)
+            .body("size()", equalTo(3))
+            .body("[0].id", notNullValue())
+            .body("[0].username", equalTo("batch_a_" + suffix))
+            .body("[2].username", equalTo("batch_c_" + suffix));
+    }
+
+    @Test
+    void createBatch_emptyList_returns400() {
+        given()
+            .contentType(ContentType.JSON)
+            .body("[]")
+            .when().post("/api/users/batch")
+            .then()
+            .statusCode(400);
+    }
+
+    @Test
+    void createBatch_duplicateUsername_rollsBackEntireBatch() {
+        String unique = "rollback_marker_" + System.nanoTime();
+        given()
+            .contentType(ContentType.JSON)
+            .body("""
+                [
+                  {"username": "%1$s", "address": "Addr A"},
+                  {"username": "%1$s", "address": "Addr B"}
+                ]
+                """.formatted(unique))
+            .when().post("/api/users/batch")
+            .then()
+            .statusCode(greaterThanOrEqualTo(400));
+
+        given()
+            .when().get("/api/users")
+            .then()
+            .statusCode(200)
+            .body("findAll { it.username == '" + unique + "' }.size()", equalTo(0));
+    }
 }
